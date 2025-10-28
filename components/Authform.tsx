@@ -55,7 +55,7 @@ const AuthForm = ({ type }:{ type : FormType }) => {
          toast.error("Something went wrong. Please try again.");
       }
     };
-    const isSignup = type === "signup";
+    const isSignin = type === "signin";
   return (
     <div className="card-border lg:min-w-[566px]">
       <div className="flex flex-col gap-6 py-14 px-10">
@@ -67,16 +67,16 @@ const AuthForm = ({ type }:{ type : FormType }) => {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-    {!isSignup && <FormField control={form.control} name="name" label="Name" placeholder="Your Name" />}
+    {!isSignin && <FormField control={form.control} name="name" label="Name" placeholder="Your Name" />}
     <FormField control={form.control} name="email" label="Email" placeholder="Your Email" type="email" />
     <FormField control={form.control} name="password" label="Password" placeholder="Your Password" type="password" />
-    <Button className="btn" type="submit">{isSignup ? 'Sign up' : 'Sign in'}</Button>
+    <Button className="btn" type="submit">{!isSignin ? 'Sign up' : 'Sign in'}</Button>
           </form>
         </Form>
     <p className="test-center">
-      {isSignup ? "New to PrepWise? " : "Already have an account? "}
-      <Link href={isSignup ? "/sign-up" : "/sign-in"} className="text-primary-100 underline hover:text-primary-200 ml-1"> 
-        {isSignup ? "Create an account" : "Sign in"}
+      {!isSignin ?  "Already have an account?" :"New to PrepWise? " }
+      <Link href={!isSignin ? "/sign-in":"/sign-up"} className="text-primary-100 underline hover:text-primary-200 ml-1"> 
+        {!isSignin ? "Sign in":"Create an account"}
         </Link>
         </p>
       </div>
