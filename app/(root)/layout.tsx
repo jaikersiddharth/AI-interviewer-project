@@ -1,11 +1,18 @@
 import Link from 'next/link';
 import React from 'react';
 import Image from 'next/image';
-export default function RootGroupLayout({
+import { isAuthenticated } from '@/lib/actions/auth.action';
+import { redirect } from 'next/navigation';
+
+export default async function RootGroupLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const authenticated = isAuthenticated(); 
+  if(!authenticated) { 
+    redirect('/sign-in');
+  }
   return (
     <div>
         <nav className="p-6">

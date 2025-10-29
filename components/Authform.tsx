@@ -18,12 +18,15 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { FormField } from "@/components/formfield";
 import { useRouter } from "next/navigation";
-
-type FormType = "signup" | "signin";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { signUp,signIn } from "@/lib/actions/auth.action";
+type FormType = "sign-in" | "sign-up";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/firebase/client";
 
 const AuthFormSchema = ({type}:{ type: FormType }) => {
     return z.object({
-        name:type === "signup" ? z.string().min(2, "Name must be at least 2 characters") : z.string().optional(),
+        name:type === "sign-up" ? z.string().min(2, "Name must be at least 2 characters") : z.string().optional(),
         email: z.string().email("Invalid email address"),
         password: z.string().min(6, "Password must be at least 6 characters"),
     });
@@ -41,12 +44,32 @@ const AuthForm = ({ type }:{ type : FormType }) => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+async function onSubmit (values: z.infer<typeof formSchema>){
     try{
-      if(type === "signup") {
+      if(type === "sign-up") {
+        const {name,email,password} = values;
+        const userCredentials = await createUserWithEmailAndPassword(auth, email, password);
+        const result = await signUp({
+          uid: userCredentials.user.uid,
+          name: name!,
+          email,
+          password,
+        });
+        if(!result?.success) {
+          toast.error(result.message);
+          return;
+        }
         toast.success("Account created successfully!Please sign in.");
-        router.push("/signin");
+        router.push("/sign-in");
       } else {
+        const {email,password} = values;
+        const userCredentials = await signInWithEmailAndPassword(auth, email, password);
+        const idToken = await userCredentials.user.getIdToken();
+        if(!idToken) {
+          toast.error("Failed to signin Please try again.");
+          return;
+        }
+        await signIn({ email, idToken });
         toast.success("Signed in successfully!");
         router.push("/");
       }
@@ -55,7 +78,7 @@ const AuthForm = ({ type }:{ type : FormType }) => {
          toast.error("Something went wrong. Please try again.");
       }
     };
-    const isSignin = type === "signin";
+    const isSignin = type === "sign-in";
   return (
     <div className="card-border lg:min-w-[566px]">
       <div className="flex flex-col gap-6 py-14 px-10">
