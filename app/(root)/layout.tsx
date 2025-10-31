@@ -9,7 +9,7 @@ export default async function RootGroupLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const authenticated = isAuthenticated(); 
+  const authenticated = await isAuthenticated(); 
   if(!authenticated) { 
     redirect('/sign-in');
   }
